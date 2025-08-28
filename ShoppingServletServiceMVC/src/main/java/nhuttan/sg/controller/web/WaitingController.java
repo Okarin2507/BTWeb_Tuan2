@@ -19,12 +19,15 @@ public class WaitingController extends HttpServlet {
         HttpSession session = req.getSession(false);
         if (session != null && session.getAttribute("account") != null) {
             User u = (User) session.getAttribute("account");
+            
+            // FIX 3: Sửa lại điều kiện kiểm tra roleid cho đúng với database
             if (u.getRoleid() == 1) { // Admin
-                resp.sendRedirect(req.getContextPath() + "/admin/home");
-            } else if (u.getRoleid() == 2) { // User
-                resp.sendRedirect(req.getContextPath() + "/home");
-            } else { // Giả sử có thêm vai trò manager
-                 resp.sendRedirect(req.getContextPath() + "/manager/home");
+                resp.sendRedirect(req.getContextPath() + "/admin/home.jsp"); // Nên trỏ thẳng đến file
+            } else if (u.getRoleid() == 0) { // User thường
+                resp.sendRedirect(req.getContextPath() + "/home.jsp"); // Nên trỏ thẳng đến file
+            } else {
+                 // Trường hợp roleid không xác định, quay về trang login
+                 resp.sendRedirect(req.getContextPath() + "/login");
             }
         } else {
             resp.sendRedirect(req.getContextPath() + "/login");

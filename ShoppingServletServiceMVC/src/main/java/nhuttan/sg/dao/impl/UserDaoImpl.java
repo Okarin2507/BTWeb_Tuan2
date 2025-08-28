@@ -43,9 +43,14 @@ public class UserDaoImpl implements UserDao {
     @Override
     public void insert(User user) {
         String sql = "INSERT INTO [User](email, username, fullname, password, avatar, roleid, phone, createddate) VALUES (?,?,?,?,?,?,?,?)";
-        try {
-            conn = new DBConnection().getConnection();
-            ps = conn.prepareStatement(sql);
+        try (Connection conn = new DBConnection().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            // --- THÊM DÒNG DEBUG Ở ĐÂY ---
+            System.out.println("--- UserDaoImpl.insert ---");
+            System.out.println("Đang cố gắng INSERT user: " + user.getUserName());
+            // --------------------------------
+            
             ps.setString(1, user.getEmail());
             ps.setString(2, user.getUserName());
             ps.setString(3, user.getFullName());
@@ -54,11 +59,21 @@ public class UserDaoImpl implements UserDao {
             ps.setInt(6, user.getRoleid());
             ps.setString(7, user.getPhone());
             ps.setDate(8, user.getCreatedDate());
-            ps.executeUpdate();
+            
+            int affectedRows = ps.executeUpdate(); // Lấy số dòng bị ảnh hưởng
+            
+            // --- THÊM DÒNG DEBUG KẾT QUẢ ---
+            System.out.println("executeUpdate thành công, số dòng bị ảnh hưởng: " + affectedRows);
+            // ---------------------------------
+            
         } catch (Exception e) {
-            e.printStackTrace();
+            // --- IN RA LỖI THỰC SỰ ---
+            System.err.println("!!! LỖI KHI INSERT USER !!!");
+            e.printStackTrace(); // CỰC KỲ QUAN TRỌNG
+            // --------------------------
         }
     }
+    
 
     @Override
     public boolean checkExistEmail(String email) {
@@ -102,7 +117,6 @@ public class UserDaoImpl implements UserDao {
     
     @Override
     public boolean checkExistPhone(String phone) {
-        // Slide không có phần này nhưng nên có để hoàn chỉnh
         boolean duplicate = false;
         String query = "select * from [User] where phone = ?";
         try {

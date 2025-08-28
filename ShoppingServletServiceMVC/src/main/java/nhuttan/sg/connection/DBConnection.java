@@ -8,14 +8,14 @@ public class DBConnection {
     private final String serverName = "localhost";
     private final String dbName = "SQL_WEB"; 
     private final String portNumber = "63770";
-    private final String instance = ""; 
+    private final String instance = " "; 
     private final String userID = "sa"; 
     private final String password = "123"; 
 
     public Connection getConnection() {
-        String url = "jdbc:sqlserver://" + serverName + ":" + portNumber + "\\" + instance + ";databaseName=" + dbName + ";trustServerCertificate=true";;
+        String url = "jdbc:sqlserver://" + serverName + ":" + portNumber + "\\" + instance + ";databaseName=" + dbName + ";trustServerCertificate=true";
         if (instance.trim().isEmpty()) {
-            url = "jdbc:sqlserver://" + serverName + ":" + portNumber + ";databaseName=" + dbName;
+            url = "jdbc:sqlserver://" + serverName + ":" + portNumber + ";databaseName=" + dbName + ";trustServerCertificate=true";
         }
         try {
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
@@ -23,6 +23,19 @@ public class DBConnection {
         } catch (ClassNotFoundException | SQLException e) {
             e.printStackTrace();
             return null;
+        }
+    }
+    public static void main(String[] args) {
+        try {
+            Connection conn = new DBConnection().getConnection();
+            if (conn != null) {
+                System.out.println("Kết nối CSDL thành công!");
+            } else {
+                System.out.println("Kết nối CSDL thất bại!");
+            }
+        } catch (Exception e) {
+            System.out.println("Lỗi kết nối: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 }

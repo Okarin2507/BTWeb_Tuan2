@@ -32,8 +32,7 @@ public class UserServiceImpl implements UserService {
         }
         long millis = System.currentTimeMillis();
         java.sql.Date date = new java.sql.Date(millis);
-        // Mặc định roleid=2 (user thường), avatar=null khi đăng ký
-        userDao.insert(new User(email, username, fullname, password, null, 2, phone, date));
+        userDao.insert(new User(email, username, fullname, password, null, 0, phone, date));
         return true;
     }
 

@@ -32,7 +32,13 @@ public class RegisterController extends HttpServlet {
         String email = req.getParameter("email");
         String fullname = req.getParameter("fullname");
         String phone = req.getParameter("phone");
-
+        // --- THÊM CÁC DÒNG DEBUG Ở ĐÂY ---
+        System.out.println("--- RegisterController ---");
+        System.out.println("Username nhận được: " + username);
+        System.out.println("Fullname nhận được: " + fullname);
+        System.out.println("Email nhận được: " + email);
+        System.out.println("Phone nhận được: " + phone);
+        
         if (service.checkExistEmail(email)) {
             req.setAttribute("alert", "Email đã tồn tại!");
             req.getRequestDispatcher("/views/register.jsp").forward(req, resp);
