@@ -3,7 +3,7 @@ package nhuttan.sg.dao.impl;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-
+import java.sql.Timestamp;
 import nhuttan.sg.connection.DBConnection;
 import nhuttan.sg.dao.UserDao;
 import nhuttan.sg.model.User;
@@ -45,12 +45,6 @@ public class UserDaoImpl implements UserDao {
         String sql = "INSERT INTO [User](email, username, fullname, password, avatar, roleid, phone, createddate) VALUES (?,?,?,?,?,?,?,?)";
         try (Connection conn = new DBConnection().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            
-            // --- THÊM DÒNG DEBUG Ở ĐÂY ---
-            System.out.println("--- UserDaoImpl.insert ---");
-            System.out.println("Đang cố gắng INSERT user: " + user.getUserName());
-            // --------------------------------
-            
             ps.setString(1, user.getEmail());
             ps.setString(2, user.getUserName());
             ps.setString(3, user.getFullName());
@@ -59,18 +53,9 @@ public class UserDaoImpl implements UserDao {
             ps.setInt(6, user.getRoleid());
             ps.setString(7, user.getPhone());
             ps.setDate(8, user.getCreatedDate());
-            
-            int affectedRows = ps.executeUpdate(); // Lấy số dòng bị ảnh hưởng
-            
-            // --- THÊM DÒNG DEBUG KẾT QUẢ ---
-            System.out.println("executeUpdate thành công, số dòng bị ảnh hưởng: " + affectedRows);
-            // ---------------------------------
-            
+  
         } catch (Exception e) {
-            // --- IN RA LỖI THỰC SỰ ---
-            System.err.println("!!! LỖI KHI INSERT USER !!!");
-            e.printStackTrace(); // CỰC KỲ QUAN TRỌNG
-            // --------------------------
+            e.printStackTrace(); 
         }
     }
     
@@ -133,5 +118,82 @@ public class UserDaoImpl implements UserDao {
             ex.printStackTrace();
         }
         return duplicate;
+    }
+    @Override
+    public User findByEmail(String email) {
+        String sql = "SELECT * FROM [User] WHERE email = ?";
+        try (Connection conn = new DBConnection().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, email);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    User user = new User();
+                    // Lấy tất cả thông tin user
+                    user.setId(rs.getInt("id"));
+                    user.setEmail(rs.getString("email"));
+                    user.setUserName(rs.getString("username"));
+                    user.setFullName(rs.getString("fullname"));
+                    user.setPassWord(rs.getString("password"));
+                    user.setRoleid(rs.getInt("roleid"));
+                    // ... các trường khác ...
+                    return user;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    @Override
+    public User findByResetToken(String token) {
+        String sql = "SELECT * FROM [User] WHERE reset_password_token = ?";
+        try (Connection conn = new DBConnection().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, token);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    User user = new User();
+                    user.setId(rs.getInt("id"));
+                    user.setEmail(rs.getString("email"));
+                    user.setUserName(rs.getString("username"));
+                    user.setFullName(rs.getString("fullname"));
+                    user.setPassWord(rs.getString("password"));
+                    user.setRoleid(rs.getInt("roleid"));
+                    user.setResetPasswordToken(rs.getString("reset_password_token"));
+                    user.setTokenExpiryDate(rs.getTimestamp("token_expiry_date"));
+                    user.setAvatar(rs.getString("avatar"));
+                    user.setPhone(rs.getString("phone"));
+                    user.setCreatedDate(rs.getDate("createdDate"));
+                    return user;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    @Override
+    public void update(User user) {
+        String sql = "UPDATE [User] SET email = ?, username = ?, fullname = ?, password = ?, " +
+                     "avatar = ?, roleid = ?, phone = ?, reset_password_token = ?, token_expiry_date = ? " +
+                     "WHERE id = ?";
+        try (Connection conn = new DBConnection().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setString(1, user.getEmail());
+            ps.setString(2, user.getUserName());
+            ps.setString(3, user.getFullName());
+            ps.setString(4, user.getPassWord());
+            ps.setString(5, user.getAvatar());
+            ps.setInt(6, user.getRoleid());
+            ps.setString(7, user.getPhone());
+            ps.setString(8, user.getResetPasswordToken());
+            ps.setTimestamp(9, user.getTokenExpiryDate());
+            ps.setInt(10, user.getId());
+            ps.executeUpdate();
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

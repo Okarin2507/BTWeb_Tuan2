@@ -25,17 +25,4 @@ public class DBConnection {
             return null;
         }
     }
-    public static void main(String[] args) {
-        try {
-            Connection conn = new DBConnection().getConnection();
-            if (conn != null) {
-                System.out.println("Kết nối CSDL thành công!");
-            } else {
-                System.out.println("Kết nối CSDL thất bại!");
-            }
-        } catch (Exception e) {
-            System.out.println("Lỗi kết nối: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-}
+ }

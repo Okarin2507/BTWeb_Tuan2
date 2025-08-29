@@ -2,6 +2,7 @@ package nhuttan.sg.model;
 
 import java.io.Serializable;
 import java.sql.Date;
+import java.sql.Timestamp;
 
 @SuppressWarnings("serial")
 public class User implements Serializable {
@@ -14,6 +15,8 @@ public class User implements Serializable {
     private int roleid;
     private String phone;
     private Date createdDate;
+    private String resetPasswordToken;
+    private Timestamp tokenExpiryDate;
 
     // Constructors
     public User() {
@@ -56,5 +59,23 @@ public class User implements Serializable {
     public void setPhone(String phone) { this.phone = phone; }
 
     public Date getCreatedDate() { return createdDate; }
+    
     public void setCreatedDate(Date createdDate) { this.createdDate = createdDate; }
+
+    public String getResetPasswordToken() {
+        return resetPasswordToken;
+    }
+
+    public void setResetPasswordToken(String resetPasswordToken) {
+        this.resetPasswordToken = resetPasswordToken;
+    }
+
+    public Timestamp getTokenExpiryDate() {
+        return tokenExpiryDate;
+    }
+
+    public void setTokenExpiryDate(Timestamp tokenExpiryDate) {
+        this.tokenExpiryDate = tokenExpiryDate;
+    }
+
 }
