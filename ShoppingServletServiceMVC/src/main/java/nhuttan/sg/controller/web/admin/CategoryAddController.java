@@ -17,65 +17,84 @@ import nhuttan.sg.service.impl.CategoryServiceImpl;
 import nhuttan.sg.util.Constant;
 
 @WebServlet(urlPatterns = { "/admin/category/add" })
-@MultipartConfig // Annotation để kích hoạt tính năng upload file
+@MultipartConfig
 public class CategoryAddController extends HttpServlet {
     private static final long serialVersionUID = 1L;
     CategoryService cateService = new CategoryServiceImpl();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        req.getRequestDispatcher("/views/admin/add-category.jsp").forward(req, resp);
+        // Chuyển đến trang thêm mới
+        req.getRequestDispatcher("/admin/add-category.jsp").forward(req, resp);
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         req.setCharacterEncoding("UTF-8");
         
+        // --- BẮT ĐẦU DEBUG ---
+        System.out.println(">>> ĐÃ VÀO CategoryAddController.doPost()!");
+        
         Category category = new Category();
         
-        // Lấy dữ liệu từ form text
-        String cateName = req.getParameter("name");
-        category.setCateName(cateName);
-        
-        // Lấy dữ liệu từ session
-        HttpSession session = req.getSession();
-        User user = (User) session.getAttribute("account");
-        category.setUserId(user.getId());
-
-        // Xử lý file upload
-        Part filePart = req.getPart("icon"); // Lấy file từ form
-        String fileName = getFileName(filePart);
-
-        if (fileName != null && !fileName.isEmpty()) {
-            // Tạo tên file duy nhất
-            String originalFileName = fileName;
-            int index = originalFileName.lastIndexOf(".");
-            String ext = originalFileName.substring(index + 1);
-            String uniqueFileName = System.currentTimeMillis() + "." + ext;
+        try {
+            // Lấy dữ liệu từ form text
+            String cateName = req.getParameter("name");
+            category.setCateName(cateName);
+            System.out.println(">>> Tên danh mục nhận được: " + cateName);
             
-            // Đường dẫn lưu file
-            String dir = Constant.DIR + "/category";
-            File dirFile = new File(dir);
-            if (!dirFile.exists()) {
-                dirFile.mkdirs(); // Tạo thư mục nếu chưa có
+            // Lấy dữ liệu từ session
+            HttpSession session = req.getSession();
+            User user = (User) session.getAttribute("account");
+            category.setUserId(user.getId());
+            System.out.println(">>> ID của User tạo danh mục: " + user.getId());
+
+            // Xử lý file upload
+            Part filePart = req.getPart("icon");
+            String fileName = getFileName(filePart);
+            System.out.println(">>> Tên file gốc: " + fileName);
+
+            if (fileName != null && !fileName.isEmpty()) {
+                String uniqueFileName = System.currentTimeMillis() + "_" + fileName;
+                
+                String dirPath = Constant.DIR + File.separator + "category";
+                File dirFile = new File(dirPath);
+                if (!dirFile.exists()) {
+                    System.out.println(">>> Thư mục " + dirPath + " không tồn tại, đang tạo...");
+                    dirFile.mkdirs();
+                }
+
+                String filePath = dirPath + File.separator + uniqueFileName;
+                System.out.println(">>> Sẽ lưu file vào: " + filePath);
+                filePart.write(filePath); // Lưu file
+                
+                category.setIcons("category/" + uniqueFileName);
+            } else {
+                System.out.println(">>> Không có file nào được upload.");
             }
 
-            String filePath = dir + File.separator + uniqueFileName;
-            filePart.write(filePath); // Lưu file
+            System.out.println(">>> Chuẩn bị gọi cateService.insert()");
+            cateService.insert(category);
+            System.out.println(">>> Gọi cateService.insert() thành công!");
             
-            category.setIcons("category/" + uniqueFileName);
-        }
+            System.out.println(">>> Chuyển hướng về trang danh sách...");
+            resp.sendRedirect(req.getContextPath() + "/admin/category/list");
 
-        cateService.insert(category);
-        resp.sendRedirect(req.getContextPath() + "/admin/category/list");
+        } catch (Exception e) {
+            System.err.println("!!! LỖI TRONG QUÁ TRÌNH THÊM CATEGORY !!!");
+            e.printStackTrace();
+        }
+        // --- KẾT THÚC DEBUG ---
     }
     
-    // Hàm tiện ích để lấy tên file từ Part
     private String getFileName(Part part) {
         String contentDisposition = part.getHeader("content-disposition");
         for (String cd : contentDisposition.split(";")) {
             if (cd.trim().startsWith("filename")) {
-                return cd.substring(cd.indexOf('=') + 1).trim().replace("\"", "");
+                String fileName = cd.substring(cd.indexOf('=') + 1).trim().replace("\"", "");
+                if (!fileName.isEmpty()) {
+                    return fileName;
+                }
             }
         }
         return null;

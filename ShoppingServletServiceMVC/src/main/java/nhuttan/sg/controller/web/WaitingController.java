@@ -22,12 +22,14 @@ public class WaitingController extends HttpServlet {
             
             // FIX 3: Sửa lại điều kiện kiểm tra roleid cho đúng với database
             if (u.getRoleid() == 1) { // Admin
-                resp.sendRedirect(req.getContextPath() + "/admin/home.jsp"); // Nên trỏ thẳng đến file
+                // Chuyển hướng đến file home.jsp trong thư mục /admin/
+                resp.sendRedirect(req.getContextPath() + "/admin/home.jsp"); 
             } else if (u.getRoleid() == 0) { // User thường
-                resp.sendRedirect(req.getContextPath() + "/home.jsp"); // Nên trỏ thẳng đến file
+                // Chuyển hướng đến file home.jsp ở thư mục gốc webapp
+                resp.sendRedirect(req.getContextPath() + "/home.jsp"); 
             } else {
-                 // Trường hợp roleid không xác định, quay về trang login
-                 resp.sendRedirect(req.getContextPath() + "/login");
+                // Nếu có vai trò không xác định, quay về login
+                resp.sendRedirect(req.getContextPath() + "/login");
             }
         } else {
             resp.sendRedirect(req.getContextPath() + "/login");
